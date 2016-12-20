@@ -1,0 +1,236 @@
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="images/favicon.ico" />
+        <script src="js/three.min.js"></script>
+        <script src="js/OBJLoader.js"></script>
+        <script src="js/Detector.js"></script>
+        <script src="js/OrbitControls.js"></script>
+       
+        <script src="js/jquery-2.1.4.min.js"></script>
+
+        <style>
+            body {
+                background-color: #fff;
+                margin: 0px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+ <body>
+        <div id="exp">
+            Expression
+            <input type="text"/>
+            <input type="button" value="Add" onclick="addExpression()"/> 
+            <input type="button" value="View"/>
+        </div>
+        <div id="exp">
+            Expression
+            <input type="text"/>
+            <input type="button" value="Add" onclick="addExpression()"/> 
+            <input type="button" value="View"/>
+        </div>
+        <div id="exp">
+            Expression
+            <input type="text"/>
+            <input type="button" value="Add" onclick="addExpression()"/> 
+            <input type="button" value="View"/>
+        </div>
+        <div id="exp">
+            Expression
+            <input type="text"/>
+            <input type="button" value="Add" onclick="addExpression()"/> 
+            <input type="button" value="View"/>
+        </div>
+        <div id="main">
+            <script>
+                if (!Detector.webgl)
+                    Detector.addGetWebGLMessage();
+                var SCREEN_WIDTH = window.innerWidth;
+                var SCREEN_HEIGHT = window.innerHeight;
+                var container, camera, scene, renderer;
+                var characters = [];
+                var nCharacters = 0;
+                var cameraControls;
+                var controls = {
+                    moveForward: false,
+                    moveBackward: false,
+                    moveLeft: false,
+                    moveRight: false
+                };
+                var clock = new THREE.Clock();
+                init();
+                animate();
+                function init() {
+                    container = document.createElement('div');
+                    document.body.appendChild(container);
+                    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 4000);
+                    camera.position.set(0, 150, 1300);
+                    scene = new THREE.Scene();
+                    scene.fog = new THREE.Fog(0xffffff, 1000, 4000);
+                    scene.add(camera);
+                    scene.add(new THREE.AmbientLight(0x222222));
+                    var map = THREE.ImageUtils.loadTexture("images/grasslight-big-nm.jpg");
+                    map.wrapS = map.wrapT = THREE.RepeatWrapping;
+                    map.anisotropy = 16;
+                    var material = new THREE.MeshLambertMaterial({map: map, side: THREE.DoubleSide});
+                    var cylinder = new THREE.Mesh(new THREE.CylinderGeometry(50, 50, 500, 32, 30, false, 0, 8), material);
+                    object = new THREE.Mesh(new THREE.SphereGeometry(75, 20, 10), material);
+                    object.position.set(-400, 400, 200);
+                    cylinder.position.set(-400, 100, 200);
+                    scene.add(object);
+                    scene.add(cylinder);
+                    var light = new THREE.DirectionalLight(0xffffff, 2.25);
+                    light.position.set(200, 450, 500);
+                    light.castShadow = true;
+                    light.shadowMapWidth = 1024;
+                    light.shadowMapHeight = 1024;
+                    light.shadowMapDarkness = 0.95;
+                    light.shadowCameraNear = 100;
+                    light.shadowCameraFar = 1200;
+                    light.shadowCameraTop = 350;
+                    light.shadowCameraBottom = -350;
+                    light.shadowCameraRight = 1000;
+                    light.shadowCameraLeft = -1000;
+                    scene.add(light);
+                    var gt = THREE.ImageUtils.loadTexture("images/grasslight-big.jpg");
+                    var gg = new THREE.PlaneBufferGeometry(16000, 16000);
+                    var gm = new THREE.MeshPhongMaterial({color: 0xffffff, map: gt});
+                    var ground = new THREE.Mesh(gg, gm);
+                    ground.rotation.x = -Math.PI / 2;
+                    ground.material.map.repeat.set(64, 64);
+                    ground.material.map.wrapS = THREE.RepeatWrapping;
+                    ground.material.map.wrapT = THREE.RepeatWrapping;
+                    ground.receiveShadow = true;
+                    scene.add(ground);
+                    
+                    /////////////////////
+                    
+               //var skyMesh = new THREE.Mesh( new THREE.Sphere( 4000, 30, 20 ), new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/sky2.jpg' )} ) );
+		//skyMesh.scale.x = -1;
+		//skyMesh.position.y = -700
+		//skyMesh.useQuaternion = true;
+		//scene.add( skyMesh );
+
+                    /////////////////////////////////////////////////////////////////////// Tree Creation
+                    
+                    /*
+                    var geometry, material, treemesh, texturepath;
+                    
+                    var tree = new Tree({"seed": 861, "segments": 10, "levels": 5,
+                        "vMultiplier": 0.66, "twigScale": 0.47, "initalBranchLength": 0.5, "lengthFalloffFactor": 0.85, "lengthFalloffPower": 0.99,
+                        "clumpMax": 0.449, "clumpMin": 0.404, "branchFactor": 2.75, "dropAmount": 0.07, "growAmount": -0.005, "sweepAmount": 0.01,
+                        "maxRadius": 0.269, "climbRate": 0.626, "trunkKink": 0.108, "treeSteps": 4, "taperRate": 0.876, "radiusFalloffRate": 0.66,
+                        "twistRate": 2.7, "trunkLength": 1.55, "trunkMaterial": "TrunkType2", "twigMaterial": "BranchType5"});
+                    
+                    console.log(tree);
+
+                    var model = {"materials": [{"diffuse": 20000}], "colors": [0xff00ff, 0xff0000]};
+                    model.vertices = Tree.flattenArray(tree.verts);
+                    model.normals = Tree.flattenArray(tree.normals);
+                    model.uvs = [Tree.flattenArray(tree.UV)];
+                    model.vertices = Tree.flattenArray(tree.verts);
+                    model.normals = Tree.flattenArray(tree.normals);
+                    model.uvs = [Tree.flattenArray(tree.UV)];
+                    //model.faces    = Tree.flattenArray(tree.faces);
+                    model.faces = [];
+                    for (var i = 0; i < tree.faces.length; i++) {
+                        var face = tree.faces[i];
+                        model.faces.push(0);
+                        model.faces.push(face[0]);
+                        model.faces.push(face[1]);
+                        model.faces.push(face[2]);
+                    }
+                    */
+                    //var modelObj = JSON.parse(model);
+                   //console.log(modelObj);
+                    //var loader = new THREE.ObjectLoader();
+                    //var treemesh = loader.parse(model);
+                    //scene.add(treemesh);
+                    
+                    
+                    //var url = 'data:text/json;charset=utf8,' + encodeURIComponent(modelObj);
+                    //window.open(url, '_blank');
+                    //window.focus();
+                    			var onProgress = function ( xhr ) {
+					if ( xhr.lengthComputable ) {
+						var percentComplete = xhr.loaded / xhr.total * 100;
+						console.log( Math.round(percentComplete, 2) + '% downloaded' );
+					}
+				};
+
+				var onError = function ( xhr ) {
+				};
+                   var loader = new THREE.JSONLoader();
+                   
+                   var material = new THREE.MeshBasicMaterial({color: 'red', side: THREE.DoubleSide});
+                    loader.load('images/tree.obj', function (obj) {
+                    obj.traverse(function (child) {
+
+                    if (child instanceof THREE.Mesh) {
+                        child.material = material;
+                        
+                    }
+
+                    });
+                    obj.position.set(-400, 400, 200);
+                     scene.add(obj);
+                    }, onProgress, onError);
+            //       loader.load( 'brikk2.js', function ( object ) {
+            //       scene.add( object );
+            //       } );
+            
+                    /*
+                    loader.load("js/model.js", function (geometry, materials) {
+                        //treemesh = new THREE.Mesh(geometry, materials[0]);
+                        treemesh.position.set(-150, 100, 200);
+                        treemesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial({color: 0xFF0000}));
+                        scene.add(treemesh);
+                        var scale = 50;
+                        treemesh.scale.x = treemesh.scale.y = treemesh.scale.z = scale;
+                        treemesh.updateMatrix();
+                    }, texturepath);
+                    */
+                    /////////////////////////////////////////////////////////////////////////////////////////
+
+
+                    renderer = new THREE.WebGLRenderer({antialias: true});
+                    renderer.setClearColor(scene.fog.color);
+                    renderer.setPixelRatio(window.devicePixelRatio);
+                    renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+                    container.appendChild(renderer.domElement);
+                    renderer.gammaInput = true;
+                    renderer.gammaOutput = true;
+                    renderer.shadowMap.enabled = true;
+                    window.addEventListener('resize', onWindowResize, false);
+                    cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+                    cameraControls.target.set(0, 50, 0);
+                    function onWindowResize(event) {
+                        SCREEN_WIDTH = window.innerWidth;
+                        SCREEN_HEIGHT = window.innerHeight;
+                        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+                        camera.aspect = SCREEN_WIDTH / SCREEN_HEIGHT;
+                        camera.updateProjectionMatrix();
+                    }
+                }
+                function animate() {
+                    requestAnimationFrame(animate);
+                    render();
+                }
+                function render() {
+                    var delta = clock.getDelta();
+                    cameraControls.update(delta);
+                    renderer.render(scene, camera);
+                }
+                function crop() {
+
+                }
+                function addExpression() {
+
+                }
+            </script>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,257 @@
+<html lang='en'>
+    <head>
+        <title>Vegetation Scene</title>
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0'>
+        <style>
+            body {
+                margin: 0px;
+                overflow: hidden;
+            }
+            #viewport {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                background: #1b1c1e;
+                background-image: linear-gradient(#7d8fa3, #1b1c1e);
+            }
+            #info {
+                color: #fff;
+                position: absolute;
+                top: 10px;
+                width: 100%;
+                text-align: center;
+                z-index: 100;
+                display:block;
+            }
+            a { color: orange }
+        </style>
+        <script src='js/three.min.js'></script>
+        <script src='js/proctree.js'></script>
+        <script src='js/OrbitControls.js'></script>
+        <script src='js/Detector.js'></script>
+        <script src="js/OBJLoader.js"></script>
+        <script src="js/DAT.GUI.min.js"></script>
+    </head>
+    <body>
+        <div id='viewport'></div>
+        <script>
+            if (!Detector.webgl)
+                Detector.addGetWebGLMessage();
+
+            var container, scene, camera, renderer;
+            var matrix = [];
+            
+
+
+            function draw() {
+                container = document.getElementById('viewport');
+                //Scene
+                scene = new THREE.Scene();
+
+                //Renderer
+                renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+                renderer.setClearColor(0x000000, 0);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                container.appendChild(renderer.domElement);
+                //Camera
+                var aspect = container.offsetWidth / container.offsetHeight;
+                camera = new THREE.PerspectiveCamera(45, aspect, 0.01, 50);
+                orbit = new THREE.OrbitControls(camera, container);
+                orbit.addEventListener('change', render);
+
+                camera.position.z = 20;
+                camera.position.x = 20;
+                camera.position.y = 20;
+
+                var target = new THREE.Vector3(0, 0, 0);
+                camera.lookAt(target);
+                orbit.target = target;
+                camera.updateProjectionMatrix();
+
+                //Lights
+                var ambientLight = new THREE.AmbientLight(0x606060);
+                scene.add(ambientLight);
+
+                var directionalLight = new THREE.DirectionalLight(0xffffff);
+                directionalLight.position.x = Math.random() - 0.5;
+                directionalLight.position.y = Math.random() - 0.5;
+                directionalLight.position.z = Math.random() - 0.5;
+                directionalLight.position.normalize();
+                scene.add(directionalLight);
+
+                var directionalLight = new THREE.DirectionalLight(0x808080);
+                directionalLight.position.x = Math.random() - 0.5;
+                directionalLight.position.y = Math.random() - 0.5;
+                directionalLight.position.z = Math.random() - 0.5;
+                directionalLight.position.normalize();
+                scene.add(directionalLight);
+                //Grid
+                
+                var size = 100, step = 10;
+                var geometry = new THREE.Geometry();
+                for (var i = -size; i <= size; i += step) {
+                    geometry.vertices.push(new THREE.Vector3(-size, 0, i));
+                    geometry.vertices.push(new THREE.Vector3(size, 0, i));
+                    geometry.vertices.push(new THREE.Vector3(i, 0, -size));
+                    geometry.vertices.push(new THREE.Vector3(i, 0, size));
+                }
+        for (var x = -5; x < 6; x++) {
+            for (var y = -5; y < 6; y++) {
+                matrix.push({x: x,y: y});
+            }
+        }
+                var material = new THREE.LineBasicMaterial({color: 0x000000, opacity: 0.2});
+                var line = new THREE.LineSegments(geometry, material);
+                scene.add(line);
+                scene.add(new THREE.GridHelper(10, 2));
+                
+                
+                
+                var counter=0;
+                var inputArray = [];
+                inputArray.push("1, (- (* (+ -X -X) -X) (* F(+ -.5306 .1619) -X))@ (- .4333 -k)");
+                inputArray.push("4, (- (/ .7913 (/  .1154 .7378)) (* (- .4685 X) X))@(+  k -k)");
+                inputArray.push("150, (+ (* -.8378 F(+ -.8378 F(+ -.8378 -X))) (- (*  (- (* X X) -X) X) -X))@(+  -.5173 (+ (* -.7153 .3306) (+ -.5173 (+ (- .2429 .2429)(/ (+ -.972 -.2652) .2384)))))");
+                inputArray.push("150, (+ (* X X) (+ (- .5487 -.9314) .7542))@  (/ .1150 .1150)");
+                /*
+                var gui = new dat.GUI();
+                var parameters = {a: function() 
+                    {   
+                        parameters.counter="";
+                        var controller = gui.add(parameters,"counter").name("Input "+counter);
+                        //controller.onChange(function(value) {
+                        controller.onFinishChange(function(value) {
+                          var string = "";
+                          string = string + value;
+                          inputArray.push(string);  
+                        });
+                        
+                        //gui.add(function(){gui.add(parameters,"c").name("Input");});
+                        counter++;
+                        
+                    }, c: function(){} , d: function(){buildTrees(inputArray);}};
+                
+                gui.add(parameters,"a").name("Add");                 
+                gui.add(parameters,"c").name("Reset");
+                gui.add(parameters,"d").name("Show");
+                gui.open();
+                */
+               
+                 for(var i = 0 ; i < 4 ; i++){
+                    var material_1 = new THREE.MeshLambertMaterial({color: 0x00FF00});
+                    var material_2 = new THREE.MeshLambertMaterial({color: 0xFFFF00});
+                    var material_3 = new THREE.MeshLambertMaterial({color: 0x0000FF});
+                    var material_4 = new THREE.MeshLambertMaterial({color: 0xFF0000});
+                    var group_num = 0;
+                    //for(var j = 0 ; j < inputArray.length+4 ; j=j+4){
+                        var treemesh_1 = parseandcreate(inputArray[0],material_1);
+                        var treemesh_2 = parseandcreate(inputArray[1],material_2);
+                        var treemesh_3 = parseandcreate(inputArray[2],material_3);
+                        var treemesh_4 = parseandcreate(inputArray[3],material_4);
+                        scene.add(treemesh_1);
+                        scene.add(treemesh_2);
+                        scene.add(treemesh_3);
+                        scene.add(treemesh_4);
+                        
+                    //}
+                }
+
+                
+                
+
+                
+                window.addEventListener('resize', onWindowResize, false);
+                geometry.dispose();
+                material.dispose();
+                
+            }
+
+            function onWindowResize() {
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                render();
+            }
+
+            function render() {
+                renderer.render(scene, camera);
+            }
+            
+
+            
+            function parseandcreate(input,material){
+                input.indexOf("F");
+                 var star = parseInt(""+input[0]+input[1]+input[2]);
+                 var branchLength = 0;
+                 if(star>20){
+                     branchLength = star/60;
+                 }
+                 if(star<=5){
+                     branchLength = star/5;
+                    if(star<=1){
+                        branchLength = star/10;
+                    }
+                 }
+
+                 var manager = new THREE.LoadingManager();
+                 
+                 var myTree = new Tree({
+                     "seed":250,
+                     "segments":6,
+                     "levels":5,
+                     "vMultiplier":2.36,
+                     "twigScale":0.05,
+                     "initalBranchLength":branchLength,
+                     "lengthFalloffFactor":0.85,
+                     "lengthFalloffPower":0.99,
+                     "clumpMax":0.454,
+                     "clumpMin":0.404,
+                     "branchFactor":2.45,
+                     "dropAmount":-0.1,
+                     "growAmount":0.235,
+                     "sweepAmount":0.01,
+                     "maxRadius":0.139,
+                     "climbRate":0.371,
+                     "trunkKink":0.093,
+                     "treeSteps":5,
+                     "taperRate":0.947,
+                     "radiusFalloffRate":0.73,
+                     "twistRate":3.02,
+                     "trunkLength":input.length/10,
+                     "trunkMaterial":"TrunkType2",
+                     "twigMaterial":"BranchType3"});
+                 
+                var vertArray = myTree.verts;
+                var treegeometry = new THREE.Geometry();
+                for(var i = 0; i < vertArray.length; i++){
+                    treegeometry.vertices.push(new THREE.Vector3(vertArray[i][0], vertArray[i][1], vertArray[i][2]));
+                }
+                var faceArray = myTree.faces;
+                for(var i = 0; i < faceArray.length; i++){
+                    treegeometry.faces.push(new THREE.Face3(faceArray[i][0], faceArray[i][1], faceArray[i][2]));
+                    treegeometry.computeFaceNormals();
+                }
+                var treemesh = new THREE.Mesh(treegeometry,material);
+                treemesh.scale.set(0.5, 0.5, 0.5);
+                var x_value, y_value, z_value;
+                //var numberOfPointsPerSample = numberOfPoints/numberOfSamples;
+                //var rand = myArray[Math.floor(Math.random() * myArray.length)];
+                var randPoint = matrix[Math.floor(Math.random() * 121)+1];
+                //var randPoint = matrix[8];
+                x_value = (randPoint.x)*2;
+                y_value = 0;
+                z_value = (randPoint.y)*2;
+                
+                treemesh.position.set(x_value,y_value,z_value);
+
+                return treemesh;
+            }
+
+            draw();
+            render();
+
+        </script>
+    </body>
+</html>
